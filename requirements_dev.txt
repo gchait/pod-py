@@ -1,0 +1,5 @@
+isort
+black
+bandit
+flake8
+pylint
