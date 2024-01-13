@@ -1,10 +1,11 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-from os import error
-from typing import Optional
 from pathlib import Path
-import yaml
+from typing import NamedTuple, Optional
+
 import click
+import yaml
 
 
 @dataclass(kw_only=True, slots=True, frozen=True)
@@ -32,13 +33,12 @@ class Pod:
             namespace=namespace,
             manifest=manifest,
         )
-    
+
     @classmethod
     def basic_load(cls, name: str, namespace: str) -> Pod:
         return cls(name=name, namespace=namespace)
 
 
-@dataclass(kw_only=True, slots=True)
-class CmdResult:
+class CommandResult(NamedTuple):
     out: str = ""
     err: str = ""

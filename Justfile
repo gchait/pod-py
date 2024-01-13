@@ -20,3 +20,5 @@ lint:
 
 test:
     poetry run pytest .
+
+qa: fmt lint test
