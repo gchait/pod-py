@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "pod-py"
+version = "0.1.0"
+description = "A simple CLI to create or manage a Kubernetes Pod."
+authors = ["Guy Chait"]
+readme = "README.md"
+packages = [{include = "pod_py"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+click = "^8.1.7"
+kubernetes = "^29.0.0"
+
+[tool.poetry.group.dev.dependencies]
+isort = "^5.13.2"
+black = "^23.12.1"
+flake8 = "^7.0.0"
+pylint = "^3.0.3"
+bandit = "^1.7.6"
+mypy = "^1.8.0"
+pytest = "^7.4.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+pod-py = "pod_py.cli:cli"

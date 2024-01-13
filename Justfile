@@ -1,24 +1,22 @@
-set dotenv-load
+run *ARGS:
+    poetry run pod-py {{ARGS}}
 
-run *ARGS: venv
-    python3 -m pod_py {{ARGS}}
+clean:
+    find . -type d -name "__pycache__" | xargs rm -rf {};
 
-fmt: venv
-    isort "${PY_SRC}" > /dev/null
-    black "${PY_SRC}" 2> /dev/null
+install:
+    command -v poetry || { >&2 echo "Please install poetry first."; exit 2; }
+    poetry install
 
-lint: venv
-    flake8 --max-line-length "${PY_MAX_LINE_LEN}" "${PY_SRC}"
-    pylint "${PY_SRC}"
-    bandit -r "${PY_SRC}"
+fmt:
+    poetry run isort --profile=black .
+    poetry run black .
 
-test: venv
-    python3 -m unittest
+lint:
+    poetry run flake8 --max-line-length 90 .
+    poetry run pylint .
+    poetry run mypy .
+    poetry run bandit -r .
 
-venv:
-    #!/bin/bash
-    set -euo pipefail
-    python3 -m venv ./.venv
-    source ./.venv/bin/activate
-    set -x
-    pip3 install -q -r ./requirements_dev.txt -r ./requirements.txt
+test:
+    poetry run pytest .
