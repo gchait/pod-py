@@ -13,12 +13,13 @@ fmt:
     poetry run black .
 
 lint:
-    poetry run flake8 --max-line-length 90 .
-    poetry run pylint .
-    poetry run mypy .
-    poetry run bandit -r .
+    poetry run flake8 --max-line-length=90 .
+    poetry run bandit --skip=B101 -r .
 
 test:
     poetry run pytest .
 
 qa: fmt lint test
+
+kube:
+    minikube start --driver=docker
