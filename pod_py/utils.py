@@ -24,11 +24,10 @@ class PodInfo:
             manifest = yaml.safe_load(raw)
 
         if "metadata" not in manifest:
-            click.echo("Missing pod `metadata`.", err=True)
-            exit(2)
+            kube_error("Missing pod `metadata`.")
+
         if not manifest["metadata"] or "name" not in manifest["metadata"]:
-            click.echo("Missing pod `metadata.name`.", err=True)
-            exit(2)
+            kube_error("Missing pod `metadata.name`.")
 
         name = manifest["metadata"]["name"]
         namespace = manifest["metadata"].get("namespace", "default")

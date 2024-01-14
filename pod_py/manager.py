@@ -18,15 +18,11 @@ class PodManager:
         self._pod_info = pod_info
 
     def deploy(self) -> Iterator[CR]:
-        if not self._pod_info.manifest:
-            raise ValueError(
-                "Tried to deploy a pod without a manifest, which is not allowed here."
-            )
-
         try:
             self._api.create_namespaced_pod(
                 body=self._pod_info.manifest, namespace=self._pod_info.namespace
             )
+
         except KubeApiException as kae:
             msg = "Creation failed."
             if kae.body:
@@ -36,18 +32,24 @@ class PodManager:
         yield CR(out=f"{self._pod_info} created successfully!")
 
     def execute(self, command: str) -> Iterator[CR]:
-        resp = kube_stream(
-            self._api.connect_get_namespaced_pod_exec,
-            self._pod_info.name,
-            self._pod_info.namespace,
-            command=["/bin/bash", "-c", command],
-            tty=False,
-            stdin=False,
-            stdout=True,
-            stderr=True,
-        )
+        try:
+            resp = kube_stream(
+                self._api.connect_get_namespaced_pod_exec,
+                self._pod_info.name,
+                self._pod_info.namespace,
+                command=["/bin/bash", "-c", command],
+                tty=False,
+                stdin=False,
+                stdout=True,
+                stderr=True,
+            )
+            yield CR(out=resp)
 
-        yield CR(out=resp)
+        except KubeApiException as kae:
+            msg = "Command execution failed."
+            if kae.reason:
+                msg = kae.reason.split(" -+-+- ")[-1]
+            yield CR(err=msg)
 
     def ls(self, directory: str) -> Iterator[CR]:
         return self.execute(f"ls -lah {directory}")

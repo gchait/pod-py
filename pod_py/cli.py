@@ -44,7 +44,7 @@ def deploy(ctx: click.Context):
 @existing_pod.command(help="Execute a Bash command inside a Pod.")
 @arguments.command
 @click.pass_context
-def execute(ctx: click.Context, command: str):
+def ex(ctx: click.Context, command: str):
     func = ctx.obj.pod_manager.execute
     cli_eval_pod_manager_results(func, command=command)
 
