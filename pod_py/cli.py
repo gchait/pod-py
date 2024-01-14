@@ -1,72 +1,68 @@
-from pathlib import Path
-from sys import exit
+import sys
+from dataclasses import dataclass
 
 import click
 
 from .manager import PodManager
 from .utils import PodInfo
+from . import arguments
+
+
+@dataclass(kw_only=True, slots=True)
+class PodCliData:
+    pod_info: PodInfo
+    pod_manager: PodManager
 
 
 @click.group()
-def cli():
-    pass
+@arguments.kubeconfig
+@arguments.manifest
+@click.pass_context
+def new_pod(ctx, kubeconfig, manifest):
+    pod_info=PodInfo.extended_load(yaml_path=manifest)
+    pod_manager = PodManager(kubeconfig=kubeconfig, pod_info=pod_info)
+    ctx.obj = PodCliData(pod_info=pod_info, pod_manager=pod_manager)
 
 
-@cli.command(help="Deploy a pod.")
-@click.argument(
-    "kubeconfig",
-    type=click.Path(exists=True, dir_okay=False, readable=True, allow_dash=False),
-)
-@click.argument(
-    "manifest_path",
-    type=click.Path(
-        exists=True, dir_okay=False, readable=True, allow_dash=False, path_type=Path
-    ),
-)
-def deploy(kubeconfig: Path, manifest_path: Path):
-    pod_info = PodInfo.extended_load(yaml_path=manifest_path)
-    pod_manager = PodManager(kubeconfig_path=kubeconfig, pod_info=pod_info)
+@click.group()
+@arguments.kubeconfig
+@arguments.namespace
+@arguments.name
+@click.pass_context
+def existing_pod(ctx: click.Context, kubeconfig, namespace, name):
+    pod_info=PodInfo.basic_load(namespace=namespace, name=name)
+    pod_manager = PodManager(kubeconfig=kubeconfig, pod_info=pod_info)
+    ctx.obj = PodCliData(pod_info=pod_info, pod_manager=pod_manager)
 
-    for stdout, stderr in pod_manager.deploy():
+
+@new_pod.command(help="Deploy a pod.")
+@click.pass_context
+def deploy(ctx: click.Context):
+    for stdout, stderr in ctx.obj.pod_manager.deploy():
         if stdout:
             click.echo(stdout)
         if stderr:
             click.secho(stderr, err=True, fg="red")
-            exit(1)
+            sys.exit(1)
 
 
-@cli.command(help="Execute a Bash command inside a pod.")
-@click.argument(
-    "kubeconfig",
-    type=click.Path(exists=True, dir_okay=False, readable=True, allow_dash=False),
-)
-@click.argument("namespace")
-@click.argument("name")
-@click.argument("command")
-def execute(kubeconfig: Path, namespace: str, name: str, command: str):
+@existing_pod.command(help="Execute a Bash command inside a pod.")
+@arguments.command
+@click.pass_context
+def execute(ctx: click.Context, command: str):
     ...
 
 
-@cli.command(help="List files inside a given directory in a pod.")
-@click.argument(
-    "kubeconfig",
-    type=click.Path(exists=True, dir_okay=False, readable=True, allow_dash=False),
-)
-@click.argument("namespace")
-@click.argument("name")
-@click.argument("directory")
-def ls(kubeconfig: Path, namespace: str, name: str, directory: str):
+@existing_pod.command(help="List files inside a given directory in a pod.")
+@arguments.directory
+@click.pass_context
+def ls(ctx: click.Context, directory: str):
     ...
 
 
-@cli.command(help="Copy a file to/from the pod, Use `pod://` to reference it.")
-@click.argument(
-    "kubeconfig",
-    type=click.Path(exists=True, dir_okay=False, readable=True, allow_dash=False),
-)
-@click.argument("namespace")
-@click.argument("name")
-@click.argument("src_path")
-@click.argument("dest_path")
-def cp(kubeconfig: Path, namespace: str, name: str, src_path: str, dest_path: str):
+@existing_pod.command(help="Copy a file to/from the pod, Use `pod://` to reference it.")
+@arguments.src_path
+@arguments.dest_path
+@click.pass_context
+def cp(ctx: click.Context, src_path: str, dest_path: str):
     ...

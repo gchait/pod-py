@@ -23,4 +23,6 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-pod-py = "pod_py.cli:cli"
+pod-py-new = "pod_py.cli:new_pod"
+pod-py-manage = "pod_py.cli:existing_pod"
+# Separate commands because of https://github.com/pallets/click/issues/347

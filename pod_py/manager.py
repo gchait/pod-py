@@ -12,8 +12,8 @@ from .utils import PodInfo
 
 
 class PodManager:
-    def __init__(self, kubeconfig_path: Path, pod_info: PodInfo):
-        load_kube_config(config_file=kubeconfig_path)
+    def __init__(self, kubeconfig: Path, pod_info: PodInfo):
+        load_kube_config(config_file=kubeconfig)
         self._api = KubeCoreV1()
         self._pod_info = pod_info
 
