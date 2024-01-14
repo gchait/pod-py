@@ -35,29 +35,27 @@ class PodManager:
 
         yield CR(out=f"{self._pod_info} created successfully!")
 
-    def execute(self, shell_command: str) -> Iterator[CR]:
-        command = ["/bin/bash", "-c", shell_command]
-
-        _ = kube_stream(
+    def execute(self, command: str) -> Iterator[CR]:
+        resp = kube_stream(
             self._api.connect_get_namespaced_pod_exec,
             self._pod_info.name,
             self._pod_info.namespace,
-            command=command,
+            command=["/bin/bash", "-c", command],
             tty=False,
             stdin=False,
             stdout=True,
             stderr=True,
         )
 
-        yield CR()
+        yield CR(out=resp)
 
-    def ls(self, remote_path: str) -> Iterator[CR]:
-        return self.execute(f"ls -lah {remote_path}")
+    def ls(self, directory: str) -> Iterator[CR]:
+        return self.execute(f"ls -lah {directory}")
 
-    def cp_to_pod(self, local_path: str, remote_path: str) -> Iterator[CR]:
+    def cp_to_pod(self, src_path: str, dest_path: str) -> Iterator[CR]:
         ...
         yield CR()
 
-    def cp_from_pod(self, remote_path: str, local_path: str) -> Iterator[CR]:
+    def cp_from_pod(self, src_path: str, dest_path: str) -> Iterator[CR]:
         ...
         yield CR()

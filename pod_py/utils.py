@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-from sys import exit
-from typing import NamedTuple, Optional
+from typing import Callable, NamedTuple, Optional
 
 import click
 import yaml
@@ -42,3 +42,25 @@ class PodInfo:
 class CommandResult(NamedTuple):
     out: str = ""
     err: str = ""
+
+
+def cli_print(msg: str) -> None:
+    click.echo(msg)
+
+
+def cli_error(msg: str) -> None:
+    click.secho(msg, err=True, fg="red")
+    sys.exit(1)
+
+
+def kube_error(msg: str) -> None:
+    click.secho(msg, err=True, fg="red")
+    sys.exit(2)
+
+
+def cli_eval_pod_manager_results(func: Callable, **kwargs) -> None:
+    for stdout, stderr in func(**kwargs):
+        if stdout:
+            cli_print(stdout)
+        if stderr:
+            kube_error(stderr)
