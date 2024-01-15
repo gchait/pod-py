@@ -10,10 +10,10 @@ fmt:
 
 lint:
     poetry run ruff check .
-    poetry run mypy . --pretty --disable-error-code=import-untyped
-    poetry run bandit --skip=B101 -r .
+    poetry run mypy --pretty --disable-error-code=import-untyped .
+    poetry run bandit --skip=B101 -qr .
 
 test:
-    poetry run pytest .
+    poetry run pytest -W ignore::DeprecationWarning .
 
 qa: fmt lint test
