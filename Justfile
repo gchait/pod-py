@@ -6,11 +6,11 @@ kube:
     minikube start --driver=docker
 
 fmt:
-    poetry run isort --profile=black .
-    poetry run black .
+    poetry run ruff format .
 
 lint:
-    poetry run flake8 --max-line-length=90 .
+    poetry run ruff check .
+    poetry run mypy . --pretty --disable-error-code=import-untyped
     poetry run bandit --skip=B101 -r .
 
 test:

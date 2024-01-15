@@ -14,7 +14,11 @@ kubeconfig = click.argument(
 manifest = click.argument(
     "manifest",
     type=click.Path(
-        exists=True, dir_okay=False, readable=True, allow_dash=False, path_type=Path
+        exists=True,
+        dir_okay=False,
+        readable=True,
+        allow_dash=False,
+        path_type=Path,
     ),
 )
 

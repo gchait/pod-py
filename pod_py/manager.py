@@ -1,6 +1,6 @@
 """
 The PodManager is the "backend" of the CLI.
-All Kubernetes logic sits here, no CLI logic does.
+All Kubernetes logic sits here, no CLI logic should.
 """
 
 import json
