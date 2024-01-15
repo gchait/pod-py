@@ -1,4 +1,5 @@
-"""Some general utilities to be used by other modules.
+"""
+Some general utilities to be used by other modules.
 """
 
 from __future__ import annotations
