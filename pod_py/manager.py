@@ -25,21 +25,34 @@ class PodManager:
         self._api = KubeCoreV1()
         self._pod_info = pod_info
 
+    @staticmethod
+    def _extract_msg_create_error(kae: KubeApiException) -> str:
+        msg = "Creation failed."
+        if kae.body:
+            msg = json.loads(kae.body).get("message", msg)
+        return msg
+    
+    @staticmethod
+    def _extract_msg_exec_error(kae: KubeApiException) -> str:
+        msg = "Command execution failed."
+        if kae.reason:
+            msg = kae.reason.split(" -+-+- ")[-1]
+        return msg
+
     def deploy(self) -> Iterator[CR]:
         try:
             self._api.create_namespaced_pod(
-                body=self._pod_info.manifest, namespace=self._pod_info.namespace
+                body=self._pod_info.manifest,
+                namespace=self._pod_info.namespace,
             )
 
         except KubeApiException as kae:
-            msg = "Creation failed."
-            if kae.body:
-                msg = json.loads(kae.body).get("message", msg)
-            yield CR(err=msg)
+            yield CR(err=self._extract_msg_create_error(kae))
 
         yield CR(out=f"{self._pod_info} created successfully!")
 
     def execute(self, command: str) -> Iterator[CR]:
+        resp = None
         try:
             resp = kube_stream(
                 self._api.connect_get_namespaced_pod_exec,
@@ -51,13 +64,12 @@ class PodManager:
                 stdout=True,
                 stderr=True,
             )
-            yield CR(out=resp)
 
         except KubeApiException as kae:
-            msg = "Command execution failed."
-            if kae.reason:
-                msg = kae.reason.split(" -+-+- ")[-1]
-            yield CR(err=msg)
+            yield CR(err=self._extract_msg_exec_error(kae))
+        
+        if resp:
+            yield CR(out=resp)
 
     def ls(self, directory: str) -> Iterator[CR]:
         return self.execute(f"ls -lah {directory}")
@@ -70,48 +82,58 @@ class PodManager:
             tar.add(src, arcname=dest.joinpath(src.name))
         commands = [buf.getvalue()]
 
-        resp = kube_stream(
-            self._api.connect_get_namespaced_pod_exec,
-            self._pod_info.name,
-            self._pod_info.namespace,
-            command=["tar", "xvf", "-", "-C", "/"],
-            tty=False,
-            stdin=True,
-            stdout=True,
-            stderr=True,
-            _preload_content=False,
-        )
-
-        while resp.is_open():
-            resp.update(timeout=1)
-            if resp.peek_stdout():
-                yield CR(out=f"STDOUT: {resp.read_stdout()}")
-            if resp.peek_stderr():
-                yield CR(out=f"STDERR: {resp.read_stderr()}")
-            if commands:
-                c = commands.pop(0)
-                resp.write_stdin(c)
-            else:
-                break
-        resp.close()
-
-        yield CR(out=f"File {src_path} copied to pod successfully!")
-
-    def cp_from_pod(self, src_path: str, dest_path: str) -> Iterator[CR]:
-        src, dest = src_path.removeprefix("/"), Path(dest_path)
-
-        with TemporaryFile() as tar_buffer:
+        resp = None
+        try:
             resp = kube_stream(
                 self._api.connect_get_namespaced_pod_exec,
                 self._pod_info.name,
                 self._pod_info.namespace,
-                command=["tar", "cf", "-", "-C", "/", src],
+                command=["tar", "xvf", "-", "-C", "/"],
                 tty=False,
                 stdin=True,
                 stdout=True,
                 stderr=True,
                 _preload_content=False,
             )
+        except KubeApiException as kae:
+            yield CR(err=self._extract_msg_exec_error(kae))
+        if not resp:
+            return
+
+        while resp.is_open():
+            resp.update(timeout=1)
+            if resp.peek_stderr():
+                yield CR(err=resp.read_stderr())
+            if commands:
+                c = commands.pop(0)
+                resp.write_stdin(c)
+            else:
+                break
+        resp.close()
+        
+        yield CR(out=f"{src_path} copied to pod successfully!")
+
+    def cp_from_pod(self, src_path: str, dest_path: str) -> Iterator[CR]:
+        src, dest = src_path.removeprefix("/"), Path(dest_path)
+
+        with TemporaryFile() as tar_buffer:
+            resp = None
+            try:
+                resp = kube_stream(
+                    self._api.connect_get_namespaced_pod_exec,
+                    self._pod_info.name,
+                    self._pod_info.namespace,
+                    command=["tar", "cf", "-", "-C", "/", src],
+                    tty=False,
+                    stdin=True,
+                    stdout=True,
+                    stderr=True,
+                    _preload_content=False,
+                )
+            except KubeApiException as kae:
+                yield CR(err=self._extract_msg_exec_error(kae))
+            if not resp:
+                return
 
             while resp.is_open():
                 resp.update(timeout=1)
@@ -132,4 +154,4 @@ class PodManager:
                     fname = member.name.rsplit("/", 1)[1]
                     tar.makefile(member, dest.joinpath(fname))
 
-        yield CR(out=f"File {src_path} copied to host successfully!")
+        yield CR(out=f"{src_path} copied to host successfully!")
