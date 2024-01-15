@@ -1,3 +1,8 @@
+"""
+The PodManager is the "backend" of the CLI.
+All Kubernetes logic sits here, no CLI logic does.
+"""
+
 import json
 from collections.abc import Iterator
 from pathlib import Path

@@ -1,3 +1,7 @@
+"""
+Some arguments are declared here so the cli module won't be ugly.
+"""
+
 from pathlib import Path
 
 import click

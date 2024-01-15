@@ -1,3 +1,7 @@
+"""
+Some general utilities to be used by other modules.
+"""
+
 from __future__ import annotations
 
 import sys
@@ -11,6 +15,7 @@ import yaml
 
 @dataclass(kw_only=True, slots=True, frozen=True)
 class PodInfo:
+    """A structure to store Pod metadata (or its entire manifest) in."""
     namespace: str
     name: str
     manifest: Optional[dict] = None
