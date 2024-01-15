@@ -1,5 +1,4 @@
-"""
-Some arguments are declared here so the cli module won't be ugly.
+"""Some arguments are declared here so the cli module won't be ugly.
 """
 
 from pathlib import Path
@@ -28,7 +27,7 @@ name = click.argument("name")
 
 command = click.argument("command")
 
-directory = click.argument("directory")
+pod_path = click.argument("pod_path")
 
 src_path = click.argument("src_path")
 

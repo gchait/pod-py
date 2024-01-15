@@ -26,3 +26,6 @@ build-backend = "poetry.core.masonry.api"
 pod-py-new = "pod_py.cli:new_pod"
 pod-py-manage = "pod_py.cli:existing_pod"
 # Separate commands because of https://github.com/pallets/click/issues/347
+
+[tool.ruff]
+select = ["E4", "E7", "E9", "F", "D1", "D4", "I", "N"]

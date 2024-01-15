@@ -1,11 +1,13 @@
-"""
-The PodManager is the "backend" of the CLI.
+"""The PodManager is the "backend" of the CLI.
 All Kubernetes logic sits here, no CLI logic should.
 """
 
+import io
 import json
+import tarfile
 from collections.abc import Iterator
 from pathlib import Path
+from tempfile import TemporaryFile
 
 from kubernetes.client.api.core_v1_api import CoreV1Api as KubeCoreV1
 from kubernetes.client.exceptions import ApiException as KubeApiException
@@ -14,9 +16,6 @@ from kubernetes.stream import stream as kube_stream
 
 from .utils import CommandResult as CR
 from .utils import PodInfo
-import io
-import tarfile
-from tempfile import TemporaryFile
 
 
 class PodManager:
@@ -31,7 +30,7 @@ class PodManager:
         if kae.body:
             msg = json.loads(kae.body).get("message", msg)
         return msg
-    
+
     @staticmethod
     def _extract_msg_exec_error(kae: KubeApiException) -> str:
         msg = "Command execution failed."
@@ -67,12 +66,12 @@ class PodManager:
 
         except KubeApiException as kae:
             yield CR(err=self._extract_msg_exec_error(kae))
-        
+
         if resp:
             yield CR(out=resp)
 
-    def ls(self, directory: str) -> Iterator[CR]:
-        return self.execute(f"ls -lah {directory}")
+    def ls(self, pod_path: str) -> Iterator[CR]:
+        return self.execute(f"ls -lah {pod_path}")
 
     def cp_to_pod(self, src_path: str, dest_path: str) -> Iterator[CR]:
         src, dest = Path(src_path), Path(dest_path)
@@ -110,7 +109,7 @@ class PodManager:
             else:
                 break
         resp.close()
-        
+
         yield CR(out=f"{src_path} copied to pod successfully!")
 
     def cp_from_pod(self, src_path: str, dest_path: str) -> Iterator[CR]:

@@ -14,7 +14,7 @@ from .utils import PodInfo, cli_error, cli_eval_pod_manager_results
 @arguments.manifest
 @click.pass_context
 def new_pod(ctx, kubeconfig, manifest):
-    """A CLI group for performing actions on a new Pod."""
+    """Perform actions on a new Pod."""
     pod_info = PodInfo.extended_load(yaml_path=manifest)
     ctx.obj = PodManager(kubeconfig=kubeconfig, pod_info=pod_info)
 
@@ -25,7 +25,7 @@ def new_pod(ctx, kubeconfig, manifest):
 @arguments.name
 @click.pass_context
 def existing_pod(ctx: click.Context, kubeconfig, namespace, name):
-    """A CLI group for performing actions on an existing Pod."""
+    """Perform actions on an existing Pod."""
     pod_info = PodInfo.basic_load(namespace=namespace, name=name)
     ctx.obj = PodManager(kubeconfig=kubeconfig, pod_info=pod_info)
 
@@ -46,10 +46,10 @@ def ex(ctx: click.Context, **kwargs):
 
 
 @existing_pod.command()
-@arguments.directory
+@arguments.pod_path
 @click.pass_context
 def ls(ctx: click.Context, **kwargs):
-    """List files inside a given directory in a Pod."""
+    """List files inside a Pod."""
     cli_eval_pod_manager_results(ctx.obj.ls, **kwargs)
 
 
@@ -58,7 +58,7 @@ def ls(ctx: click.Context, **kwargs):
 @arguments.dest_path
 @click.pass_context
 def cp(ctx: click.Context, **kwargs):
-    """Copy a file to/from a Pod, Use `pod://` to reference it."""
+    """Copy files to/from a Pod, Use `pod://` to reference it."""
     is_src_pod = kwargs["src_path"].startswith("pod://")
     is_dest_pod = kwargs["dest_path"].startswith("pod://")
 
