@@ -9,7 +9,7 @@ fmt:
     poetry run ruff format .
 
 lint:
-    poetry run ruff check .
+    poetry run ruff check --fix .
     poetry run mypy --pretty --disable-error-code=import-untyped .
     poetry run bandit --skip=B101 -qr .
 

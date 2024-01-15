@@ -14,6 +14,9 @@ from kubernetes.stream import stream as kube_stream
 
 from .utils import CommandResult as CR
 from .utils import PodInfo
+import io
+import tarfile
+from tempfile import TemporaryFile
 
 
 class PodManager:
@@ -60,9 +63,73 @@ class PodManager:
         return self.execute(f"ls -lah {directory}")
 
     def cp_to_pod(self, src_path: str, dest_path: str) -> Iterator[CR]:
-        ...
-        yield CR()
+        src, dest = Path(src_path), Path(dest_path)
+
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:tar") as tar:
+            tar.add(src, arcname=dest.joinpath(src.name))
+        commands = [buf.getvalue()]
+
+        resp = kube_stream(
+            self._api.connect_get_namespaced_pod_exec,
+            self._pod_info.name,
+            self._pod_info.namespace,
+            command=["tar", "xvf", "-", "-C", "/"],
+            tty=False,
+            stdin=True,
+            stdout=True,
+            stderr=True,
+            _preload_content=False,
+        )
+
+        while resp.is_open():
+            resp.update(timeout=1)
+            if resp.peek_stdout():
+                yield CR(out=f"STDOUT: {resp.read_stdout()}")
+            if resp.peek_stderr():
+                yield CR(out=f"STDERR: {resp.read_stderr()}")
+            if commands:
+                c = commands.pop(0)
+                resp.write_stdin(c)
+            else:
+                break
+        resp.close()
+
+        yield CR(out=f"File {src_path} copied to pod successfully!")
 
     def cp_from_pod(self, src_path: str, dest_path: str) -> Iterator[CR]:
-        ...
-        yield CR()
+        src, dest = src_path.removeprefix("/"), Path(dest_path)
+
+        with TemporaryFile() as tar_buffer:
+            resp = kube_stream(
+                self._api.connect_get_namespaced_pod_exec,
+                self._pod_info.name,
+                self._pod_info.namespace,
+                command=["tar", "cf", "-", "-C", "/", src],
+                tty=False,
+                stdin=True,
+                stdout=True,
+                stderr=True,
+                _preload_content=False,
+            )
+
+            while resp.is_open():
+                resp.update(timeout=1)
+                if resp.peek_stdout():
+                    tar_buffer.write(resp.read_stdout().encode("utf-8"))
+                if resp.peek_stderr():
+                    yield CR(err=resp.read_stderr())
+            resp.close()
+
+            tar_buffer.flush()
+            tar_buffer.seek(0)
+
+            with tarfile.open(fileobj=tar_buffer, mode="r:") as tar:
+                for member in tar.getmembers():
+                    if member.isdir():
+                        continue
+
+                    fname = member.name.rsplit("/", 1)[1]
+                    tar.makefile(member, dest.joinpath(fname))
+
+        yield CR(out=f"File {src_path} copied to host successfully!")
