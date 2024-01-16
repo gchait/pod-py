@@ -22,10 +22,12 @@ class PodInfo:
     manifest: Optional[dict] = None
 
     def __str__(self):
+        """Be friendly to object printers, interpolators etc."""
         return f"Pod {self.name} in namespace {self.namespace}"
 
     @classmethod
     def extended_load(cls, yaml_path: Path) -> PodInfo:
+        """Get a PodInfo object from a complete YAML manifest file path."""
         with yaml_path.open(mode="r", encoding="utf-8") as raw:
             manifest = yaml.safe_load(raw)
 
@@ -41,6 +43,7 @@ class PodInfo:
 
     @classmethod
     def basic_load(cls, namespace: str, name: str) -> PodInfo:
+        """Get a PodInfo object from a namespace and a name."""
         return cls(namespace=namespace, name=name)
 
 

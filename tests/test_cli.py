@@ -1,9 +1,14 @@
+"""
+Some tests for the pod_py.cli module.
+"""
+
 from click.testing import CliRunner
 
 from pod_py.cli import existing_pod, new_pod
 
 
 def test_new_pod_help():
+    """Ensure the New Pod CLI group can show help."""
     runner = CliRunner()
     result = runner.invoke(new_pod, ["--help"])
     assert result.exit_code == 0
@@ -11,6 +16,7 @@ def test_new_pod_help():
 
 
 def test_existing_pod_help():
+    """Ensure the Manage Pod CLI group can show help."""
     runner = CliRunner()
     result = runner.invoke(existing_pod, ["--help"])
     assert result.exit_code == 0
