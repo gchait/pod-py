@@ -1,7 +1,3 @@
-neofetch
-
-docker --version; just --version; poetry --version; python --version
-
 just kube
 
 just install
