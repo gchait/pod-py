@@ -1,5 +1,5 @@
 """
-Some arguments are declared here so the cli module won't be ugly.
+Arguments are declared here so the `cli` module won't be ugly.
 """
 
 from pathlib import Path
@@ -8,7 +8,12 @@ import click
 
 kubeconfig = click.argument(
     "kubeconfig",
-    type=click.Path(exists=True, dir_okay=False, readable=True, allow_dash=False),
+    type=click.Path(
+        exists=True,
+        dir_okay=False,
+        readable=True,
+        allow_dash=False,
+    ),
 )
 
 manifest = click.argument(

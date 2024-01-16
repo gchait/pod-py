@@ -22,7 +22,7 @@ from .utils import PodInfo
 class PodManager:
     """Using IO, Tars, the Kubernetes SDK and more to manage Pods and stream results."""
 
-    def __init__(self, kubeconfig: Path, pod_info: PodInfo):
+    def __init__(self, kubeconfig: str, pod_info: PodInfo):
         """Initialize a new PodManager."""
         load_kube_config(config_file=kubeconfig)
         self._api = KubeCoreV1()

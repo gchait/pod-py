@@ -17,6 +17,7 @@
 - A running Kubernetes cluster (I used [Minikube](https://minikube.sigs.k8s.io/docs/start/) here).
 - A kubeconfig file that gives you Pod management permissions.
 - I haven't tested this on Windows, but it might work regardless.
+- I recommend having [Kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl) around, even though it is not technically required.
 
 
 ### Assumptions
@@ -90,13 +91,15 @@ Commands:
 
 - The `new_pod` CLI group exists (rather than straight up calling `deploy` directly) to support more actions on non-existing Pods, such as client-side schema validation, security best-practices linting, scanning the image itself (e.g. with `grype`) etc. Also, it's more elegant to have 2 parallel groups so that all upstream commands are comparable in logic, argument/context inheritence, and development processes.
 
+- All `cp` functionality was tested only on simple, small files. I am not 100% sure it would work on large and complex structures, with different encodings, filesystems etc.
+
 
 ### Ideas to make it better
 - A proper CI/CD pipeline (with GitHub actions being an obvious pick here), feature branching, tags, releases etc.
 
 - Add an option to run this as a docker container, to have somewhat less prerequisites. Might be overkill.
 
-- Package it for proper hosted distribution (there is no reason since `kubectl` exists, but would still be fun/funny), at least for `pip`, `dnf`, `apt`, `scoop` and standalones (maybe for more architectures, maybe PyInstaller).
+- Package it for proper hosted distribution (there is no reason since `kubectl` exists, but would still be fun/funny), at least for `pip`, `dnf`, `apt`, `scoop` and standalones (maybe for more architectures, maybe with PyInstaller).
 
 - Add more (and actual) tests.
 
@@ -104,9 +107,9 @@ Commands:
 
 - When executing on the Pod, find a way to get the return code and return the same one to the end-user.
 
-- Verify which Python version is actually required here.
+- Verify the oldest supported Python version.
 
-- Handle more exceptions, I probably didn't cover a lot that could go wrong.
+- Handle more exceptions, I probably didn't cover a lot that could go wrong. One easy example is the `urllib3.exceptions.MaxRetryError` exception that is raised when the cluster is not reachable.
 
 
 <sub><sup>Disclaimer: This is not the best I can do. It might be the best I can do in less than a week, in my free time, using technologies I've never used before such as Click, Poetry and Ruff (which I do believe are the best for the job). Of course, no kind of AI was used.</sub></sup>

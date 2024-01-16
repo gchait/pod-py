@@ -1,6 +1,9 @@
 """
-Entrypoint for the CLI, only CLI-related objects.
+Entrypoint for the CLI, only clean-ish high-level CLI logic.
 """
+
+from pathlib import Path
+from typing import Any
 
 import click
 
@@ -13,7 +16,7 @@ from .utils import PodInfo, cli_error, cli_eval_pod_manager_results
 @arguments.kubeconfig
 @arguments.manifest
 @click.pass_context
-def new_pod(ctx, kubeconfig, manifest):
+def new_pod(ctx: click.Context, kubeconfig: str, manifest: Path) -> None:
     """Perform actions on a new Pod."""
     pod_info = PodInfo.extended_load(yaml_path=manifest)
     ctx.obj = PodManager(kubeconfig=kubeconfig, pod_info=pod_info)
@@ -24,7 +27,9 @@ def new_pod(ctx, kubeconfig, manifest):
 @arguments.namespace
 @arguments.name
 @click.pass_context
-def existing_pod(ctx: click.Context, kubeconfig, namespace, name):
+def existing_pod(
+    ctx: click.Context, kubeconfig: str, namespace: str, name: str
+) -> None:
     """Perform actions on an existing Pod."""
     pod_info = PodInfo.basic_load(namespace=namespace, name=name)
     ctx.obj = PodManager(kubeconfig=kubeconfig, pod_info=pod_info)
@@ -32,7 +37,7 @@ def existing_pod(ctx: click.Context, kubeconfig, namespace, name):
 
 @new_pod.command()
 @click.pass_context
-def deploy(ctx: click.Context, **kwargs):
+def deploy(ctx: click.Context, **kwargs: Any) -> None:
     """Deploy a Pod."""
     cli_eval_pod_manager_results(ctx.obj.deploy, **kwargs)
 
@@ -40,7 +45,7 @@ def deploy(ctx: click.Context, **kwargs):
 @existing_pod.command()
 @arguments.command
 @click.pass_context
-def ex(ctx: click.Context, **kwargs):
+def ex(ctx: click.Context, **kwargs: Any) -> None:
     """Execute a Bash command inside a Pod."""
     cli_eval_pod_manager_results(ctx.obj.execute, **kwargs)
 
@@ -48,7 +53,7 @@ def ex(ctx: click.Context, **kwargs):
 @existing_pod.command()
 @arguments.pod_path
 @click.pass_context
-def ls(ctx: click.Context, **kwargs):
+def ls(ctx: click.Context, **kwargs: Any) -> None:
     """List files inside a Pod."""
     cli_eval_pod_manager_results(ctx.obj.ls, **kwargs)
 
@@ -57,7 +62,7 @@ def ls(ctx: click.Context, **kwargs):
 @arguments.src_path
 @arguments.dest_path
 @click.pass_context
-def cp(ctx: click.Context, **kwargs):
+def cp(ctx: click.Context, **kwargs: Any) -> None:
     """Copy files to/from a Pod, Use `pod://` to reference it."""
     is_src_pod = kwargs["src_path"].startswith("pod://")
     is_dest_pod = kwargs["dest_path"].startswith("pod://")

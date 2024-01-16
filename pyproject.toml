@@ -27,4 +27,8 @@ pod-py-new = "pod_py.cli:new_pod"
 pod-py-manage = "pod_py.cli:existing_pod"
 
 [tool.ruff]
-select = ["E4", "E7", "E9", "F", "D1", "D4", "I", "N"]
+select = ["E4", "E7", "E9", "F", "D1", "D4", "I", "N", "PL"]
+
+[tool.mypy]
+disable_error_code = "import-untyped"
+disallow_untyped_defs = true

@@ -7,7 +7,7 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, NamedTuple, Optional
+from typing import Any, Callable, NamedTuple, Optional
 
 import click
 import yaml
@@ -21,7 +21,7 @@ class PodInfo:
     name: str
     manifest: Optional[dict] = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Be friendly to object printers, interpolators etc."""
         return f"Pod {self.name} in namespace {self.namespace}"
 
@@ -71,7 +71,7 @@ def kube_error(msg: str) -> None:
     sys.exit(2)
 
 
-def cli_eval_pod_manager_results(func: Callable, **kwargs) -> None:
+def cli_eval_pod_manager_results(func: Callable, **kwargs: Any) -> None:
     """Loop over the PodManager generator yields and print their results."""
     for stdout, stderr in func(**kwargs):
         if stdout:
