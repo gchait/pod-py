@@ -6,7 +6,8 @@
 
 **A simple CLI to create or manage a Kubernetes Pod.**
 
-<sub><sup>Disclaimer: This is not the best I can do. It might be the best I can do in less than a week, in my free time, using technologies I've never used before such as Click, Poetry and Ruff (which I do believe are the best for the job). Of course, no kind of AI was used.</sub></sup>
+![](./demo.gif)
+<sub>Demo created with [asciinema](https://github.com/asciinema/asciinema) and [agg](https://github.com/asciinema/agg).</sub>
 
 
 ### Prerequisites
@@ -64,6 +65,19 @@ Commands:
   ls  List files inside a Pod.
 ```
 
+##### Commands used in the demo above
+```
+❯ just kube
+❯ just install
+❯ just qa
+❯ poetry run pod-py-new ~/.kube/config ./pod.yaml deploy
+❯ mkdir -p /tmp/very/much; echo -n "lala\n123\nlala\n456" > /tmp/very/much/hello.txt
+❯ poetry run pod-py-manage ~/.kube/config hi nginx cp /tmp/very pod:///tmp
+❯ poetry run pod-py-manage ~/.kube/config hi nginx ex "cat /tmp/very/much/hello.txt"
+❯ poetry run pod-py-manage ~/.kube/config hi nginx ls /etc/nginx
+❯ poetry run pod-py-manage ~/.kube/config hi nginx cp pod:///etc/nginx/nginx.conf .
+❯ head ./nginx.conf
+```
 
 ### Important notes and decisions
 - There are 2 separate top-level commands/scripts (`pod-py-new`, `pod-py-manage`) because of [this issue](https://github.com/pallets/click/issues/347). I didn't like the hacky solutions I found online.
@@ -95,14 +109,4 @@ Commands:
 - Handle more exceptions, I probably didn't cover a lot that could go wrong.
 
 
-### Developed and tested on
-```
-OS: Fedora Linux 39 (Workstation Edition) x86_64
-Kernel: 6.6.9-200.fc39.x86_64
-
-minikube 1.32.0
-Docker 24.0.7
-just 1.22.1
-Poetry 1.5.1
-Python 3.12.1
-```
+<sub><sup>Disclaimer: This is not the best I can do. It might be the best I can do in less than a week, in my free time, using technologies I've never used before such as Click, Poetry and Ruff (which I do believe are the best for the job). Of course, no kind of AI was used.</sub></sup>
