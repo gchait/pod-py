@@ -6,6 +6,8 @@
 
 **A simple CLI to create or manage a Kubernetes Pod.**
 
+Disclaimer: This is not the best I can do.  
+It might be the best I can do in a week, in my free time, using technologies I've never used such as Click and Poetry.
 
 #### Prerequisites
 - Python 3.12+

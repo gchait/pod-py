@@ -45,25 +45,31 @@ class PodInfo:
 
 
 class CommandResult(NamedTuple):
+    """For convenience in streaming the stdout and stderr of PodManager."""
+
     out: str = ""
     err: str = ""
 
 
 def cli_print(msg: str) -> None:
+    """Just print something using the click handler."""
     click.echo(msg)
 
 
 def cli_error(msg: str) -> None:
+    """For errors that are related to CLI usage."""
     click.secho(msg, err=True, fg="red")
     sys.exit(1)
 
 
 def kube_error(msg: str) -> None:
+    """For errors that are related to Kubernetes."""
     click.secho(msg, err=True, fg="red")
     sys.exit(2)
 
 
 def cli_eval_pod_manager_results(func: Callable, **kwargs) -> None:
+    """Loop over the PodManager generator yields and print their results."""
     for stdout, stderr in func(**kwargs):
         if stdout:
             cli_print(stdout)
