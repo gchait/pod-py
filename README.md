@@ -6,7 +6,7 @@
 
 **A simple CLI to create or manage a Kubernetes Pod.**
 
-Disclaimer: This is not the best I can do. It might be the best I can do in a week, in my free time, using technologies I've never used before such as Click and Poetry.
+<sub><sup>Disclaimer: This is not the best I can do. It might be the best I can do in less than a week, in my free time, using technologies I've never used before such as Click, Poetry and Ruff (which I do believe are the best for the job). Of course, no kind of AI was used.</sub></sup>
 
 
 ### Prerequisites
@@ -100,10 +100,9 @@ Commands:
 OS: Fedora Linux 39 (Workstation Edition) x86_64
 Kernel: 6.6.9-200.fc39.x86_64
 
-minikube version: v1.32.0
-commit: 8220a6eb95f0a4d75f7f2d7b14cef975f050512d
-Docker version 24.0.7, build afdd53b
+minikube 1.32.0
+Docker 24.0.7
 just 1.22.1
-Poetry (version 1.5.1)
+Poetry 1.5.1
 Python 3.12.1
 ```

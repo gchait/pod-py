@@ -4,10 +4,6 @@ just install
 
 just qa
 
-poetry run pod-py-new ~/.kube/config ./pod.yaml --help
-
-poetry run pod-py-manage ~/.kube/config hi nginx --help
-
 poetry run pod-py-new ~/.kube/config ./pod.yaml deploy
 
 mkdir -p /tmp/very/much; echo -n "lala\n123\nlala\n456" > /tmp/very/much/hello.txt
@@ -20,4 +16,4 @@ poetry run pod-py-manage ~/.kube/config hi nginx ls /etc/nginx
 
 poetry run pod-py-manage ~/.kube/config hi nginx cp pod:///etc/nginx/nginx.conf .
 
-head nginx.conf
+head ./nginx.conf
